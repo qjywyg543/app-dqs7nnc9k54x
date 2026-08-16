@@ -1,0 +1,119 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-user:
+    name: Build User App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        working-directory: apps/mobile-user
+        run: npm install
+
+      - name: Prebuild Android
+        working-directory: apps/mobile-user
+        run: npx expo prebuild --platform android
+
+      - name: Build APK
+        working-directory: apps/mobile-user/android
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: lottery-user-app
+          path: apps/mobile-user/android/app/build/outputs/apk/release/app-release.apk
+
+  build-admin:
+    name: Build Admin App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        working-directory: apps/mobile-admin
+        run: npm install
+
+      - name: Prebuild Android
+        working-directory: apps/mobile-admin
+        run: npx expo prebuild --platform android
+
+      - name: Build APK
+        working-directory: apps/mobile-admin/android
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: lottery-admin-app
+          path: apps/mobile-admin/android/app/build/outputs/apk/release/app-release.apk
+
+  release-apk:
+    name: Publish APKs
+    needs: [build-user, build-admin]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download user APK
+        uses: actions/download-artifact@v4
+        with:
+          name: lottery-user-app
+          path: release/user/
+
+      - name: Download admin APK
+        uses: actions/download-artifact@v4
+        with:
+          name: lottery-admin-app
+          path: release/admin/
+
+      - name: Rename artifacts
+        run: |
+          mkdir -p release
+          mv release/user/app-release.apk release/lottery-user-app.apk
+          mv release/admin/app-release.apk release/lottery-admin-app.apk
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: APK Build ${{ github.run_number }}
+          files: |
+            release/lottery-user-app.apk
+            release/lottery-admin-app.apk
+          token: ${{ secrets.GITHUB_TOKEN }}

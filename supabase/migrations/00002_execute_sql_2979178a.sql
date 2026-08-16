@@ -1,0 +1,1 @@
+TRUNCATE lottery_results;
