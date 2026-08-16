@@ -58,7 +58,10 @@ export default function Home() {
                   <Link to="/prediction">预测推荐</Link>
                 </Button>
                 <Button asChild variant="secondary" size="sm">
-                  <Link to="/history">历史记录</Link>
+                  <Link to="/category/welfare">福彩历史开奖</Link>
+                </Button>
+                <Button asChild variant="secondary" size="sm">
+                  <Link to="/category/sports">体彩历史开奖</Link>
                 </Button>
               </div>
 
@@ -89,8 +92,6 @@ export default function Home() {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <CategoryPill to="/category/welfare" icon="福" label="福彩开奖结果" tone="welfare" />
-              <CategoryPill to="/category/sports" icon="体" label="体彩开奖结果" tone="sports" />
               <Link
                 to="/download"
                 className="group flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground shadow-card transition-all hover:shadow-hover"
@@ -176,35 +177,3 @@ export default function Home() {
   );
 }
 
-function CategoryPill({
-  to,
-  icon,
-  label,
-  tone,
-}: {
-  to: string;
-  icon: string;
-  label: string;
-  tone: 'welfare' | 'sports';
-}) {
-  return (
-    <Link
-      to={to}
-      className={`group flex items-center gap-2 rounded-full border px-4 py-2 shadow-card transition-all hover:shadow-hover ${
-        tone === 'welfare'
-          ? 'border-accent/40 bg-gradient-to-r from-accent/10 to-card hover:from-accent/20'
-          : 'border-primary/40 bg-gradient-to-r from-primary/10 to-card hover:from-primary/20'
-      }`}
-    >
-      <span
-        className={`flex h-7 w-7 items-center justify-center rounded-full font-display text-sm text-accent-foreground ${
-          tone === 'welfare' ? 'bg-accent' : 'bg-primary'
-        }`}
-      >
-        {icon}
-      </span>
-      <span className="text-sm font-medium text-foreground">{label}</span>
-      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-    </Link>
-  );
-}
