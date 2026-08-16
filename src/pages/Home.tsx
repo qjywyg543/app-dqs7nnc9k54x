@@ -46,21 +46,21 @@ export default function Home() {
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   <Gamepad2 className="h-3 w-3" />
                 </span>
-                模拟投注
+                模拟试玩
                 <ChevronRight className="h-3 w-3 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
               </Link>
 
-              <div className="flex flex-col items-center gap-2 md:flex-row">
+              <div className="flex flex-row items-center gap-2">
                 <Button asChild size="sm">
                   <Link to="/check">中奖查询</Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
                   <Link to="/prediction">预测推荐</Link>
                 </Button>
-                <Button asChild variant="secondary" size="sm">
+                <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
                   <Link to="/category/welfare">福彩历史开奖</Link>
                 </Button>
-                <Button asChild variant="secondary" size="sm">
+                <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                   <Link to="/category/sports">体彩历史开奖</Link>
                 </Button>
               </div>
@@ -118,11 +118,11 @@ export default function Home() {
                       <span>微信：{WECHAT_ID}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={copyWechat}>
+                      <Button size="sm" className="h-8 gap-1 bg-accent text-xs text-accent-foreground hover:bg-accent/90" onClick={copyWechat}>
                         <Copy className="mr-1 h-3 w-3" />
                         复制
                       </Button>
-                      <Button size="sm" className="h-8 gap-1 text-xs" onClick={openWechat}>
+                      <Button size="sm" className="h-8 gap-1 bg-primary text-xs text-primary-foreground hover:bg-primary/90" onClick={openWechat}>
                         <WeChatIcon className="h-3.5 w-3.5" />
                         打开微信
                       </Button>
