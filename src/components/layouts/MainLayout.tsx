@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, Clock, Home, Search, Sparkles, History, Trophy, Store, Download } from 'lucide-react';
+import { Menu, Clock, Home, Search, Sparkles, History, Trophy, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { formatDateTime } from '@/lib/lottery-utils';
@@ -11,7 +11,6 @@ const navItems = [
   { path: '/prediction', label: '预测推荐', icon: Sparkles },
   { path: '/history', label: '历史记录', icon: History },
   { path: '/contact', label: '联系店主', icon: Store },
-  { path: '/download', label: '下载 App', icon: Download },
 ];
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
