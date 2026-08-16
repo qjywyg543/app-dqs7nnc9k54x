@@ -95,7 +95,7 @@ export default function Admin() {
             <TabsTrigger value="overview">数据概览</TabsTrigger>
             <TabsTrigger value="users">用户数据</TabsTrigger>
             <TabsTrigger value="events">埋点事件</TabsTrigger>
-            <TabsTrigger value="play">模拟投注</TabsTrigger>
+            <TabsTrigger value="play">模拟试玩</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -110,7 +110,7 @@ export default function Admin() {
                 <StatCard icon={Eye} title="页面浏览" total={stats.totalPageViews} today={stats.todayPageViews} />
                 <StatCard icon={MousePointer} title="按钮点击" total={stats.totalClicks} today={stats.todayClicks} />
                 <StatCard icon={Users} title="注册用户" total={stats.totalUsers} today={stats.todayUsers} />
-                <StatCard icon={Gamepad2} title="模拟投注" total={stats.totalPlayBets} today={stats.todayPlayBets} />
+                <StatCard icon={Gamepad2} title="模拟试玩" total={stats.totalPlayBets} today={stats.todayPlayBets} />
               </div>
             )}
 
@@ -214,11 +214,11 @@ export default function Admin() {
           <TabsContent value="play" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>模拟投注统计</CardTitle>
+                <CardTitle>模拟试玩统计</CardTitle>
                 <CardDescription>总投注次数 {stats?.totalPlayBets ?? 0}，今日 {stats?.todayPlayBets ?? 0}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">模拟投注数据已存储在 user_play_records 表中，包含彩种、期号、号码、状态、中奖等级等字段。</p>
+                <p className="text-sm text-muted-foreground">模拟试玩数据已存储在 user_play_records 表中，包含彩种、期号、号码、状态、中奖等级等字段。</p>
               </CardContent>
             </Card>
           </TabsContent>

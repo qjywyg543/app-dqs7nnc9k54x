@@ -59,7 +59,7 @@ export default function Login() {
 
   return (
     <>
-      <PageMeta title="登录 - 中国彩票开奖大厅" description="登录或注册账号，体验模拟投注练手功能" />
+      <PageMeta title="登录 - 中国彩票开奖大厅" description="登录或注册账号，体验模拟试玩练手功能" />
       <div className="min-h-screen px-4 py-6 md:py-12">
         <div className="mx-auto max-w-md">
           <div className="mb-6 text-center">
@@ -77,7 +77,7 @@ export default function Login() {
               <CardHeader>
                 <CardTitle>{mode === 'login' ? '登录' : '注册'}</CardTitle>
                 <CardDescription>
-                  {mode === 'login' ? '登录后体验模拟投注练手' : '注册账号开始模拟投注练手'}
+                  {mode === 'login' ? '登录后体验模拟试玩练手' : '注册账号开始模拟试玩练手'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -148,7 +148,7 @@ export default function Login() {
                 </div>
 
                 <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-                  <p>提示：本网站仅提供彩票开奖信息查询与模拟投注，不涉及任何真实购买、充值或支付功能。</p>
+                  <p>提示：本网站仅提供彩票开奖信息查询与模拟试玩，不涉及任何真实购买、充值或支付功能。</p>
                 </div>
               </CardContent>
             </Card>

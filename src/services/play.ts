@@ -22,7 +22,7 @@ export async function savePlayRecord(
   });
 
   if (error) {
-    console.error('保存模拟投注记录失败:', error);
+    console.error('保存模拟试玩记录失败:', error);
     throw new Error(error.message);
   }
 }
@@ -38,7 +38,7 @@ export async function getPlayRecords(page = 1, pageSize = 20): Promise<{ data: P
     .range(from, to);
 
   if (error) {
-    console.error('获取模拟投注记录失败:', error);
+    console.error('获取模拟试玩记录失败:', error);
     throw new Error(error.message);
   }
 
@@ -48,6 +48,6 @@ export async function getPlayRecords(page = 1, pageSize = 20): Promise<{ data: P
 export async function updatePendingRecords(): Promise<void> {
   const { error } = await supabase.rpc('check_pending_play_records');
   if (error) {
-    console.error('更新模拟投注记录失败:', error);
+    console.error('更新模拟试玩记录失败:', error);
   }
 }

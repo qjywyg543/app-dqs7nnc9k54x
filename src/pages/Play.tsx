@@ -65,7 +65,7 @@ export default function Play() {
   if (!user) {
     return (
       <div className="min-h-screen px-4 py-12 text-center">
-        <p className="text-lg text-muted-foreground">请先登录后再模拟投注</p>
+        <p className="text-lg text-muted-foreground">请先登录后再模拟试玩</p>
         <Button asChild className="mt-4">
           <Link to="/login">去登录</Link>
         </Button>
@@ -329,11 +329,11 @@ function PlayPage() {
         mode,
         danCountValue
       );
-      toast.success('模拟投注成功');
+      toast.success('模拟试玩成功');
       setSubmitted(true);
       await loadRecords(recordsPage);
     } catch (e) {
-      toast.error('保存模拟投注记录失败');
+      toast.error('保存模拟试玩记录失败');
     } finally {
       setLoading(false);
     }
@@ -346,7 +346,7 @@ function PlayPage() {
           <Button asChild variant="outline" size="sm">
             <Link to="/">返回首页</Link>
           </Button>
-          <h1 className="font-display text-2xl md:text-4xl text-foreground">模拟投注</h1>
+          <h1 className="font-display text-2xl md:text-4xl text-foreground">模拟试玩</h1>
         </div>
 
         <motion.div
@@ -556,7 +556,7 @@ function PlayPage() {
                   </div>
 
                   <Button onClick={handlePlay} disabled={loading} className="w-full">
-                    {loading ? '提交中...' : '提交模拟投注'}
+                    {loading ? '提交中...' : '提交模拟试玩'}
                   </Button>
 
                   {error && (
@@ -597,7 +597,7 @@ function PlayPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>我的模拟投注记录</CardTitle>
+              <CardTitle>我的模拟试玩记录</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {recordsLoading ? (
@@ -607,7 +607,7 @@ function PlayPage() {
                   ))}
                 </div>
               ) : records.length === 0 ? (
-                <p className="text-muted-foreground">暂无模拟投注记录</p>
+                <p className="text-muted-foreground">暂无模拟试玩记录</p>
               ) : (
                 <>
                   <div className="hidden md:block w-full max-w-full overflow-x-auto bg-card">
