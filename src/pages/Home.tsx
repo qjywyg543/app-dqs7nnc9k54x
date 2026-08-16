@@ -50,13 +50,16 @@ export default function Home() {
                 <ChevronRight className="h-3 w-3 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
               </Link>
 
-              <div className="flex flex-row items-center gap-2">
-                <Button asChild size="sm">
+              <div className="flex flex-row items-center justify-center gap-2">
+                <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                   <Link to="/check">中奖查询</Link>
                 </Button>
-                <Button asChild variant="outline" size="sm">
+                <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
                   <Link to="/prediction">预测推荐</Link>
                 </Button>
+              </div>
+
+              <div className="flex flex-row items-center justify-center gap-2">
                 <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
                   <Link to="/category/welfare">福彩历史开奖</Link>
                 </Button>
