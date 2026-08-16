@@ -68,7 +68,7 @@ export const routes: RouteConfig[] = [
     public: true,
   },
   {
-    name: '模拟投注',
+    name: '模拟试玩',
     path: '/play',
     element: withLayout(<Play />),
     public: true,
