@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 
 interface LotteryNumberInputProps {
@@ -21,6 +22,38 @@ export function LotteryNumberInput({
 }: LotteryNumberInputProps) {
   const redValues = values.slice(0, redCount);
   const blueValues = values.slice(redCount, redCount + blueCount);
+  const redRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const blueRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    redRefs.current = redRefs.current.slice(0, redCount);
+    blueRefs.current = blueRefs.current.slice(0, blueCount);
+  }, [redCount, blueCount]);
+
+  function focusNext(currentGlobalIndex: number) {
+    const nextIndex = currentGlobalIndex + 1;
+    if (nextIndex < redCount) {
+      redRefs.current[nextIndex]?.focus();
+      return;
+    }
+    if (nextIndex < redCount + blueCount) {
+      blueRefs.current[nextIndex - redCount]?.focus();
+    }
+  }
+
+  function handleRedChange(index: number, value: string) {
+    onChange(index, value);
+    if (value.length >= 2) {
+      focusNext(index);
+    }
+  }
+
+  function handleBlueChange(index: number, value: string) {
+    onChange(redCount + index, value);
+    if (value.length >= 2) {
+      focusNext(redCount + index);
+    }
+  }
 
   return (
     <div className={`space-y-4 ${className ?? ''}`}>
@@ -38,8 +71,11 @@ export function LotteryNumberInput({
             {redValues.map((value, index) => (
               <Input
                 key={`red-${index}`}
+                ref={(el) => {
+                  redRefs.current[index] = el;
+                }}
                 value={value}
-                onChange={(e) => onChange(index, e.target.value)}
+                onChange={(e) => handleRedChange(index, e.target.value)}
                 className="border-accent/20 bg-background/80 text-center placeholder:text-muted-foreground/40"
                 maxLength={3}
                 inputMode="numeric"
@@ -64,8 +100,11 @@ export function LotteryNumberInput({
             {blueValues.map((value, index) => (
               <Input
                 key={`blue-${index}`}
+                ref={(el) => {
+                  blueRefs.current[index] = el;
+                }}
                 value={value}
-                onChange={(e) => onChange(redCount + index, e.target.value)}
+                onChange={(e) => handleBlueChange(index, e.target.value)}
                 className="border-info/20 bg-background/80 text-center placeholder:text-muted-foreground/40"
                 maxLength={3}
                 inputMode="numeric"
