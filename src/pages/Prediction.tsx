@@ -16,7 +16,7 @@ import {
   calculateHotNumbers,
   calculateColdNumbers,
 } from '@/services/lottery';
-import { Brain, TrendingUp, Lightbulb, Zap, History, BarChart3, CheckCircle2, Copy, ShoppingCart } from 'lucide-react';
+import { Brain, History, BarChart3, CheckCircle2, Copy, ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ColdNumber, HotNumber, LotteryGame, LotteryResult } from '@/types/lottery';
 
@@ -26,13 +26,6 @@ interface GeneratedPick {
   tags: string[];
   mode: string;
 }
-
-const AI_FEATURES = [
-  { icon: Brain, title: 'AI算法', desc: '深度学习' },
-  { icon: TrendingUp, title: '走势分析', desc: '数据驱动' },
-  { icon: Lightbulb, title: '智能推荐', desc: '遗漏值追踪' },
-  { icon: Zap, title: '快速生成', desc: '一键选号' },
-];
 
 const AI_ALGORITHMS = [
   { id: 'hot', name: '热号追踪', desc: '优先近期高频号码', color: 'bg-red-500/10 text-red-600' },
@@ -221,46 +214,33 @@ export default function Prediction() {
           className="space-y-6"
         >
           <Card className="overflow-hidden border-border bg-gradient-to-br from-card to-muted">
-            <CardContent className="p-6 text-center md:p-10">
-              <h2 className="font-display text-2xl md:text-3xl text-foreground">AI智能选号系统</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground md:text-base">
-                基于深度学习算法，智能分析历史数据，为您提供专业选号建议
+            <CardContent className="p-4 text-center">
+              <h2 className="font-display text-xl text-foreground">AI智能选号</h2>
+              <p className="mx-auto mt-1 max-w-2xl text-xs text-muted-foreground">
+                智能分析历史数据，提供专业选号建议
               </p>
-              <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-                {AI_FEATURES.map((item) => (
-                  <div
-                    key={item.title}
-                    className="rounded-xl border border-border bg-card p-4 text-center shadow-card"
-                  >
-                    <item.icon className="mx-auto h-6 w-6 text-primary" />
-                    <p className="mt-2 font-semibold text-foreground">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle>选择彩票类型</CardTitle>
-              <CardDescription>选择您想要分析的彩种</CardDescription>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">选择彩票类型</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                 {games.map((game) => (
                   <button
                     key={game.code}
                     onClick={() => setSelectedCode(game.code)}
-                    className={`rounded-xl border p-4 text-left transition-all ${
+                    className={`rounded-lg border p-2 text-left transition-all ${
                       selectedCode === game.code
                         ? 'border-primary bg-primary/10 ring-1 ring-primary'
                         : 'border-border bg-card hover:border-primary/50'
                     }`}
                     type="button"
                   >
-                    <p className="font-semibold text-foreground">{game.display_name}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{ruleLabel(game)}</p>
+                    <p className="text-sm font-semibold text-foreground">{game.display_name}</p>
+                    <p className="text-xs text-muted-foreground">{ruleLabel(game)}</p>
                   </button>
                 ))}
               </div>
@@ -270,10 +250,10 @@ export default function Prediction() {
           {selectedGame && (
             <>
               <Card>
-                <CardHeader>
-                  <CardTitle>选号参数</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">选号参数</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <span className="text-sm font-medium">玩法模式</span>
                     <Tabs value={playMode} onValueChange={(v) => setPlayMode(v as 'single' | 'complex' | 'dantuo')}>
@@ -401,52 +381,52 @@ export default function Prediction() {
 
               {generated.length > 0 && (
                 <Card>
-                  <CardHeader>
+                  <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle>AI推荐号码</CardTitle>
-                        <CardDescription>基于选中算法生成的号码组合</CardDescription>
+                        <CardTitle className="text-base">AI推荐号码</CardTitle>
+                        <CardDescription className="text-xs">基于选中算法生成的号码组合</CardDescription>
                       </div>
                       <Button variant="outline" size="sm" onClick={copyAll}>
                         <Copy className="mr-1 h-4 w-4" />
-                        一键复制全部
+                        复制全部
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-3">
                     {generated.map((pick, idx) => (
                       <div
                         key={idx}
-                        className="rounded-xl border border-border bg-muted p-4"
+                        className="rounded-lg border border-border bg-muted p-3"
                       >
-                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-2">
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <span className="text-sm font-semibold">第 {idx + 1} 组</span>
-                            <Badge variant="secondary">{pick.mode}</Badge>
+                            <Badge variant="secondary" className="text-xs">{pick.mode}</Badge>
                             {pick.tags.map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
+                              <Badge key={tag} variant="outline" className="text-[10px]">
                                 {tag}
                               </Badge>
                             ))}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => copyPick(pick)}>
-                              <Copy className="mr-1 h-4 w-4" />
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => copyPick(pick)}>
+                              <Copy className="mr-1 h-3 w-3" />
                               复制
                             </Button>
-                            <Button asChild variant="default" size="sm">
+                            <Button asChild variant="default" size="sm" className="h-7 px-2 text-xs">
                               <Link to={playUrl(pick)}>
-                                <ShoppingCart className="mr-1 h-4 w-4" />
-                                模拟投注
+                                <ShoppingCart className="mr-1 h-3 w-3" />
+                                模拟试玩
                               </Link>
                             </Button>
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           {pick.numbers.map((n, i) => (
                             <span
                               key={i}
-                              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent text-base font-bold text-accent-foreground"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground"
                             >
                               {String(n).padStart(2, '0')}
                             </span>
@@ -454,7 +434,7 @@ export default function Prediction() {
                           {pick.special.map((n, i) => (
                             <span
                               key={`s-${i}`}
-                              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
                             >
                               {String(n).padStart(2, '0')}
                             </span>
@@ -496,16 +476,16 @@ export default function Prediction() {
               </div>
 
               <Card>
-                <CardHeader>
-                  <CardTitle>AI算法</CardTitle>
-                  <CardDescription>选择多种算法组合，提高选号覆盖率</CardDescription>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">AI算法</CardTitle>
+                  <CardDescription className="text-xs">选择多种算法组合，提高选号覆盖率</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-3 md:grid-cols-2">
+                  <div className="grid gap-2 md:grid-cols-2">
                     {AI_ALGORITHMS.map((item) => (
                       <div
                         key={item.id}
-                        className={`flex items-start gap-3 rounded-xl border p-4 transition-all ${
+                        className={`flex items-start gap-2 rounded-lg border p-2 transition-all ${
                           selectedAlgorithms.includes(item.id)
                             ? 'border-primary bg-primary/5'
                             : 'border-border bg-card hover:border-primary/30'
@@ -518,17 +498,17 @@ export default function Prediction() {
                         <Checkbox
                           checked={selectedAlgorithms.includes(item.id)}
                           onCheckedChange={() => toggleAlgorithm(item.id)}
-                          className="mt-1"
+                          className="mt-0.5"
                         />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">{item.name}</span>
-                            <span className={`rounded px-2 py-0.5 text-[10px] ${item.color}`}>AI</span>
+                            <span className="text-sm font-semibold text-foreground">{item.name}</span>
+                            <span className={`rounded px-1.5 py-0 text-[10px] ${item.color}`}>AI</span>
                           </div>
                           <p className="text-xs text-muted-foreground">{item.desc}</p>
                         </div>
                         {selectedAlgorithms.includes(item.id) && (
-                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                         )}
                       </div>
                     ))}
@@ -537,16 +517,16 @@ export default function Prediction() {
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle>DIY方法</CardTitle>
-                  <CardDescription>自定义分析方法，与AI算法叠加使用</CardDescription>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">DIY方法</CardTitle>
+                  <CardDescription className="text-xs">自定义分析方法，与AI算法叠加使用</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-3 md:grid-cols-2">
+                  <div className="grid gap-2 md:grid-cols-2">
                     {DIY_METHODS.map((item) => (
                       <div
                         key={item.id}
-                        className={`flex items-start gap-3 rounded-xl border p-4 transition-all ${
+                        className={`flex items-start gap-2 rounded-lg border p-2 transition-all ${
                           selectedDiy.includes(item.id)
                             ? 'border-primary bg-primary/5'
                             : 'border-border bg-card hover:border-primary/30'
@@ -559,17 +539,17 @@ export default function Prediction() {
                         <Checkbox
                           checked={selectedDiy.includes(item.id)}
                           onCheckedChange={() => toggleDiy(item.id)}
-                          className="mt-1"
+                          className="mt-0.5"
                         />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">{item.name}</span>
-                            <span className="rounded bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">DIY</span>
+                            <span className="text-sm font-semibold text-foreground">{item.name}</span>
+                            <span className="rounded bg-muted px-1.5 py-0 text-[10px] text-muted-foreground">DIY</span>
                           </div>
                           <p className="text-xs text-muted-foreground">{item.desc}</p>
                         </div>
                         {selectedDiy.includes(item.id) && (
-                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                         )}
                       </div>
                     ))}
@@ -580,19 +560,19 @@ export default function Prediction() {
               <Separator />
 
               <Card>
-                <CardHeader>
-                  <CardTitle>数据走势</CardTitle>
-                  <CardDescription>热号与冷号分析</CardDescription>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">数据走势</CardTitle>
+                  <CardDescription className="text-xs">热号与冷号分析</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-6 md:grid-cols-2">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div>
-                      <h3 className="mb-3 font-semibold">热号推荐</h3>
-                      <NumberGrid numbers={hotNumbers.slice(0, 20)} />
+                      <h3 className="mb-2 text-sm font-semibold">热号推荐</h3>
+                      <NumberGrid numbers={hotNumbers.slice(0, 12)} />
                     </div>
                     <div>
-                      <h3 className="mb-3 font-semibold">冷号遗漏</h3>
-                      <NumberGrid numbers={coldNumbers.slice(0, 20)} />
+                      <h3 className="mb-2 text-sm font-semibold">冷号遗漏</h3>
+                      <NumberGrid numbers={coldNumbers.slice(0, 12)} />
                     </div>
                   </div>
                 </CardContent>
@@ -610,16 +590,16 @@ function NumberGrid({ numbers }: { numbers: HotNumber[] | ColdNumber[] }) {
     return <p className="text-muted-foreground">数据不足</p>;
   }
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {numbers.map((item) => (
         <div
           key={item.number}
-          className="flex flex-col items-center rounded-lg border border-border bg-card p-2"
+          className="flex flex-col items-center rounded-md border border-border bg-card p-1"
         >
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
             {String(item.number).padStart(2, '0')}
           </span>
-          <span className="mt-1 text-xs text-muted-foreground">
+          <span className="mt-0.5 text-[10px] text-muted-foreground">
             {'count' in item ? `${item.count}次` : `${item.missing}期`}
           </span>
         </div>

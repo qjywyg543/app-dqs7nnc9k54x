@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
 import { LotteryNumberInput } from '@/components/common/LotteryNumberInput';
 import { getGames, getHistory, checkWin, generateRandomNumbers } from '@/services/lottery';
 import { parseUserInput, validateLotteryNumbers } from '@/lib/lottery-utils';
@@ -22,6 +24,12 @@ export default function CheckPrize() {
   const [issues, setIssues] = useState<LotteryResult[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'single' | 'complex' | 'dantuo'>('single');
+  const [redInputCount, setRedInputCount] = useState<number>(0);
+  const [blueInputCount, setBlueInputCount] = useState<number>(0);
+  const [danCount, setDanCount] = useState<number>(1);
+  const [tuoCount, setTuoCount] = useState<number>(5);
+  const [betCount, setBetCount] = useState<number>(1);
 
   const selectedGame = useMemo(
     () => games.find((g) => g.code === selectedCode) ?? null,
@@ -46,8 +54,15 @@ export default function CheckPrize() {
     if (!selectedGame) return;
     setResult(null);
     setError(null);
-    const count = (selectedGame.red_count ?? 0) + (selectedGame.blue_count ?? 0);
-    setInputs(Array.from({ length: count }, () => ''));
+    const rCount = selectedGame.red_count ?? 0;
+    const bCount = selectedGame.blue_count ?? 0;
+    setMode('single');
+    setRedInputCount(rCount);
+    setBlueInputCount(bCount);
+    setDanCount(1);
+    setTuoCount(Math.max(1, rCount - 1));
+    setBetCount(1);
+    setInputs(Array.from({ length: rCount + bCount }, () => ''));
 
     const gameCode = selectedGame.code;
     async function loadIssues() {
@@ -58,6 +73,27 @@ export default function CheckPrize() {
     void loadIssues();
   }, [selectedGame]);
 
+  useEffect(() => {
+    if (!selectedGame) return;
+    const rCount = selectedGame.red_count ?? 0;
+    const bCount = selectedGame.blue_count ?? 0;
+    if (mode === 'single') {
+      setRedInputCount(rCount);
+      setBlueInputCount(bCount);
+      setInputs(Array.from({ length: rCount + bCount }, () => ''));
+    } else if (mode === 'complex') {
+      const redMax = selectedGame.red_max ?? rCount;
+      const blueMax = selectedGame.blue_max ?? bCount;
+      setRedInputCount(Math.min(rCount + 1, redMax));
+      setBlueInputCount(bCount > 0 ? Math.min(bCount + 1, blueMax) : 0);
+      setInputs(Array.from({ length: Math.min(rCount + 1, redMax) + (bCount > 0 ? Math.min(bCount + 1, blueMax) : 0) }, () => ''));
+    } else {
+      setRedInputCount(danCount + tuoCount);
+      setBlueInputCount(bCount);
+      setInputs(Array.from({ length: danCount + tuoCount + bCount }, () => ''));
+    }
+  }, [mode, selectedGame, danCount, tuoCount]);
+
   function handleInputChange(index: number, value: string) {
     const newInputs = [...inputs];
     newInputs[index] = value;
@@ -66,14 +102,26 @@ export default function CheckPrize() {
 
   function handleRandom() {
     if (!selectedGame) return;
+    const allowDuplicate = selectedGame.code === '3d' || selectedGame.code === 'pl3' || selectedGame.code === 'pl5' || selectedGame.code === 'qxc' || selectedGame.code === 'seven';
+    let redCount = selectedGame.red_count ?? 0;
+    let blueCount = selectedGame.blue_count ?? 0;
+
+    if (mode === 'complex') {
+      redCount = redInputCount;
+      blueCount = blueInputCount;
+    } else if (mode === 'dantuo') {
+      redCount = danCount + tuoCount;
+      blueCount = selectedGame.blue_count ?? 0;
+    }
+
     const { numbers, special } = generateRandomNumbers(
-      selectedGame.red_count ?? 0,
+      redCount,
       selectedGame.red_min ?? 0,
       selectedGame.red_max ?? 0,
-      selectedGame.blue_count ?? 0,
+      blueCount,
       selectedGame.blue_min ?? 0,
       selectedGame.blue_max ?? 0,
-      selectedGame.code === '3d' || selectedGame.code === 'pl3' || selectedGame.code === 'pl5' || selectedGame.code === 'qxc' || selectedGame.code === 'seven',
+      allowDuplicate,
       selectedGame.code
     );
     const all = [...numbers, ...special];
@@ -90,17 +138,30 @@ export default function CheckPrize() {
 
     const redCount = selectedGame.red_count ?? 0;
     const blueCount = selectedGame.blue_count ?? 0;
-    const redInputs = inputs.slice(0, redCount).map((s) => parseUserInput(s)[0]);
-    const blueInputs = inputs.slice(redCount, redCount + blueCount).map((s) => parseUserInput(s)[0]);
+    const redInputs = inputs.slice(0, redInputCount).map((s) => parseUserInput(s)[0]);
+    const blueInputs = inputs.slice(redInputCount, redInputCount + blueInputCount).map((s) => parseUserInput(s)[0]);
 
-    const validationError = validateLotteryNumbers(selectedGame, redInputs, blueInputs);
+    if (selectedGame.code === '3d' || selectedGame.code === 'pl3' || selectedGame.code === 'pl5' || selectedGame.code === 'qxc' || selectedGame.code === 'seven') {
+      const validationError = validateLotteryNumbers(selectedGame, redInputs, blueInputs, 'single', null);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+      const win = checkWin(selectedGame, selectedResult, redInputs, []);
+      setResult(win);
+      setBetCount(1);
+      return;
+    }
+
+    const validationError = validateLotteryNumbers(selectedGame, redInputs, blueInputs, mode, mode === 'dantuo' ? danCount : null);
     if (validationError) {
       setError(validationError);
       return;
     }
 
-    const win = checkWin(selectedGame, selectedResult, redInputs, blueInputs);
-    setResult(win);
+    const win = findBestWin(selectedGame, selectedResult, redInputs, blueInputs, mode, danCount);
+    setResult(win.best);
+    setBetCount(win.count);
   }
 
   return (
@@ -158,20 +219,99 @@ export default function CheckPrize() {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label>输入号码</Label>
                       <Button type="button" variant="ghost" size="sm" onClick={handleRandom}>
                         随机一注
                       </Button>
                     </div>
+
+                    {(selectedGame.code === 'ssq' || selectedGame.code === 'dlt') && (
+                      <Tabs value={mode} onValueChange={(v) => setMode(v as 'single' | 'complex' | 'dantuo')}>
+                        <TabsList className="grid w-full grid-cols-3">
+                          <TabsTrigger value="single">单式</TabsTrigger>
+                          <TabsTrigger value="complex">复式</TabsTrigger>
+                          <TabsTrigger value="dantuo">胆拖</TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    )}
+
+                    {mode === 'complex' && (
+                      <div className="space-y-4 rounded-lg border border-border bg-muted p-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm">红球个数</Label>
+                            <span className="text-sm font-bold text-primary">{redInputCount} 个</span>
+                          </div>
+                          <Slider
+                            value={[redInputCount]}
+                            onValueChange={(value) => setRedInputCount(value[0])}
+                            min={selectedGame.red_count ?? 1}
+                            max={selectedGame.red_max ?? 33}
+                            step={1}
+                          />
+                          <p className="text-xs text-muted-foreground">标准 {selectedGame.red_count} 个，选择多个号码</p>
+                        </div>
+                        {(selectedGame.blue_count ?? 0) > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm">蓝球个数</Label>
+                              <span className="text-sm font-bold text-primary">{blueInputCount} 个</span>
+                            </div>
+                            <Slider
+                              value={[blueInputCount]}
+                              onValueChange={(value) => setBlueInputCount(value[0])}
+                              min={selectedGame.blue_count ?? 1}
+                              max={selectedGame.blue_max ?? 16}
+                              step={1}
+                            />
+                            <p className="text-xs text-muted-foreground">标准 {selectedGame.blue_count} 个，选择多个号码</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {mode === 'dantuo' && (
+                      <div className="space-y-4 rounded-lg border border-border bg-muted p-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm">胆码个数</Label>
+                            <span className="text-sm font-bold text-primary">{danCount} 个</span>
+                          </div>
+                          <Slider
+                            value={[danCount]}
+                            onValueChange={(value) => setDanCount(value[0])}
+                            min={1}
+                            max={Math.max(1, (selectedGame.red_count ?? 1) - 1)}
+                            step={1}
+                          />
+                          <p className="text-xs text-muted-foreground">必中的号码，胆码填在前 {danCount} 个框</p>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm">拖码个数</Label>
+                            <span className="text-sm font-bold text-primary">{tuoCount} 个</span>
+                          </div>
+                          <Slider
+                            value={[tuoCount]}
+                            onValueChange={(value) => setTuoCount(value[0])}
+                            min={Math.max(1, (selectedGame.red_count ?? 1) - danCount)}
+                            max={selectedGame.red_max ?? 33}
+                            step={1}
+                          />
+                          <p className="text-xs text-muted-foreground">搭配胆码的号码，拖码填在后面 {tuoCount} 个框</p>
+                        </div>
+                      </div>
+                    )}
+
                     <LotteryNumberInput
-                      redCount={selectedGame.red_count ?? 0}
-                      blueCount={selectedGame.blue_count ?? 0}
+                      redCount={redInputCount}
+                      blueCount={blueInputCount}
                       values={inputs}
                       onChange={handleInputChange}
                       redRangeHint={selectedGame.code === 'qxc' ? '前6位 0-9，第7位 0-14' : `${selectedGame.red_min}-${selectedGame.red_max}`}
-                      blueRangeHint={(selectedGame.blue_count ?? 0) > 0 ? `${selectedGame.blue_min}-${selectedGame.blue_max}` : undefined}
+                      blueRangeHint={blueInputCount > 0 ? `${selectedGame.blue_min}-${selectedGame.blue_max}` : undefined}
                     />
                   </div>
 
@@ -202,6 +342,9 @@ export default function CheckPrize() {
                         </>
                       ) : (
                         <p className="text-lg text-muted-foreground">未中奖，再接再厉</p>
+                      )}
+                      {mode !== 'single' && betCount > 1 && (
+                        <p className="mt-1 text-xs text-muted-foreground">共 {betCount} 注组合</p>
                       )}
                       {selectedResult && (
                         <p className="mt-2 text-xs text-muted-foreground">
@@ -236,4 +379,61 @@ export default function CheckPrize() {
       </div>
     </div>
   );
+}
+
+function findBestWin(
+  game: LotteryGame,
+  result: LotteryResult,
+  redInputs: number[],
+  blueInputs: number[],
+  mode: 'single' | 'complex' | 'dantuo',
+  danCount: number
+): { best: { level: number | null; name: string | null; prize: string | null }; count: number } {
+  const redCount = game.red_count ?? 0;
+  const blueCount = game.blue_count ?? 0;
+
+  let redCombinations: number[][];
+  if (mode === 'dantuo') {
+    const dan = redInputs.slice(0, danCount);
+    const tuo = redInputs.slice(danCount);
+    redCombinations = combine(tuo, redCount - danCount).map((c) => [...dan, ...c]);
+  } else {
+    redCombinations = combine(redInputs, redCount);
+  }
+
+  const blueCombinations = blueCount > 0 ? combine(blueInputs, blueCount) : [[]];
+
+  let best: { level: number | null; name: string | null; prize: string | null } = { level: null, name: null, prize: null };
+  let bestLevel = Infinity;
+  let count = 0;
+
+  for (const reds of redCombinations) {
+    for (const blues of blueCombinations) {
+      const win = checkWin(game, result, reds, blues);
+      count++;
+      if (win.level !== null && win.level < bestLevel) {
+        best = win;
+        bestLevel = win.level;
+      }
+    }
+  }
+
+  return { best, count };
+}
+
+function combine<T>(arr: T[], k: number): T[][] {
+  if (k === 0) return [[]];
+  if (arr.length < k) return [];
+  if (arr.length === k) return [arr.slice()];
+  if (k === 1) return arr.map((item) => [item]);
+
+  const result: T[][] = [];
+  for (let i = 0; i <= arr.length - k; i++) {
+    const head = arr[i];
+    const tail = arr.slice(i + 1);
+    for (const sub of combine(tail, k - 1)) {
+      result.push([head, ...sub]);
+    }
+  }
+  return result;
 }
