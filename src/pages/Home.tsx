@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { usePageView } from '@/hooks/usePageView';
+import { copyToClipboard } from '@/lib/clipboard';
 import { motion } from 'motion/react';
 import { ChevronRight, Gamepad2, LogIn, LogOut, User, Store, MessageCircle, MapPin, ShieldAlert, Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { WeChatIcon } from '@/components/icons/WeChatIcon';
 import PageMeta from '@/components/common/PageMeta';
-import { toast } from 'sonner';
 
 const WECHAT_ID = 'clx543';
 const STORE_ADDRESS = '无锡市锡山区锡北镇向阳新村63号';
@@ -18,8 +18,7 @@ export default function Home() {
   const { user, profile, signOut } = useAuth();
 
   function copyWechat() {
-    void navigator.clipboard.writeText(WECHAT_ID);
-    toast.success('微信号已复制');
+    void copyToClipboard(WECHAT_ID, '微信号已复制');
   }
 
   function openWechat() {
@@ -30,13 +29,13 @@ export default function Home() {
     <>
       <PageMeta
         title="中国彩票开奖大厅 - 福彩体彩实时开奖"
-        description="提供双色球、大乐透、福彩3D、排列3、排列5、七乐彩、快乐8、七星彩、7位数等彩种的最新开奖结果、中奖查询、走势分析和预测推荐。"
+        description="提供双色球、大乐透、福彩3D、排列3、排列5、七乐彩、快乐8、七星彩、7位数等彩种的最新开奖结果、历史开奖、走势分析和预测推荐。"
       />
       <div className="flex flex-col px-4 py-4 md:py-6">
         <div className="mx-auto max-w-7xl w-full">
           <div className="mb-5 rounded-2xl border border-border bg-gradient-to-br from-card to-muted p-4 text-center shadow-card md:p-8">
             <h1 className="font-display text-2xl md:text-4xl gold-text text-balance">中国彩票开奖大厅</h1>
-            <p className="mt-2 text-xs text-muted-foreground md:text-sm">实时开奖 · 走势分析 · 中奖查询 · 预测推荐</p>
+            <p className="mt-2 text-xs text-muted-foreground md:text-sm">实时开奖 · 历史查询 · 走势分析 · 预测推荐</p>
 
             <div className="mt-4 flex flex-col items-stretch justify-center gap-2 md:flex-row md:items-center">
               <Link
@@ -50,21 +49,15 @@ export default function Home() {
                 <ChevronRight className="h-3 w-3 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
               </Link>
 
-              <div className="flex flex-row items-center justify-center gap-2">
-                <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Link to="/check">中奖查询</Link>
-                </Button>
+              <div className="grid grid-cols-3 gap-2">
                 <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
                   <Link to="/prediction">预测推荐</Link>
                 </Button>
-              </div>
-
-              <div className="flex flex-row items-center justify-center gap-2">
-                <Button asChild size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                  <Link to="/category/welfare">福彩历史开奖</Link>
+                <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Link to="/category/welfare">福彩开奖</Link>
                 </Button>
                 <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Link to="/category/sports">体彩历史开奖</Link>
+                  <Link to="/category/sports">体彩开奖</Link>
                 </Button>
               </div>
 

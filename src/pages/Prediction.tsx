@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { usePageView } from '@/hooks/usePageView';
+import { copyToClipboard } from '@/lib/clipboard';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -168,14 +169,12 @@ export default function Prediction() {
 
   function copyPick(pick: GeneratedPick) {
     const text = formatPickText(pick);
-    void navigator.clipboard.writeText(text);
-    toast.success('号码已复制');
+    void copyToClipboard(text, '号码已复制');
   }
 
   function copyAll() {
     const text = generated.map((p, i) => `第${i + 1}组：${formatPickText(p)}`).join('\n');
-    void navigator.clipboard.writeText(text);
-    toast.success('全部号码已复制');
+    void copyToClipboard(text, '全部号码已复制');
   }
 
   function formatPickText(pick: GeneratedPick) {
@@ -215,9 +214,9 @@ export default function Prediction() {
         >
           <Card className="overflow-hidden border-border bg-gradient-to-br from-card to-muted">
             <CardContent className="p-4 text-center">
-              <h2 className="font-display text-xl text-foreground">AI智能选号</h2>
+              <h2 className="font-display text-xl text-foreground">千问智体智能选号</h2>
               <p className="mx-auto mt-1 max-w-2xl text-xs text-muted-foreground">
-                智能分析历史数据，提供专业选号建议
+                采集历史开奖结果与每日最新开奖数据，由千问智体进行大数据分析，为您推荐选号
               </p>
             </CardContent>
           </Card>

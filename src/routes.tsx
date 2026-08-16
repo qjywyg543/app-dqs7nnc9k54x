@@ -2,7 +2,6 @@ import MainLayout from '@/components/layouts/MainLayout';
 import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import GameDetail from './pages/GameDetail';
-import CheckPrize from './pages/CheckPrize';
 import Prediction from './pages/Prediction';
 import History from './pages/History';
 import Login from './pages/Login';
@@ -41,12 +40,6 @@ export const routes: RouteConfig[] = [
     name: '彩种详情',
     path: '/game/:code',
     element: withLayout(<GameDetail />),
-    public: true,
-  },
-  {
-    name: '中奖查询',
-    path: '/check',
-    element: withLayout(<CheckPrize />),
     public: true,
   },
   {

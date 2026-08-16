@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { usePageView } from '@/hooks/usePageView';
+import { copyToClipboard } from '@/lib/clipboard';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, MessageCircle, ShieldAlert, Award, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
 import { WatermarkedImage } from '@/components/common/WatermarkedImage';
 import PageMeta from '@/components/common/PageMeta';
 
@@ -19,8 +19,7 @@ const SPORTS_CERT = 'https://miaoda-conversation-file.cdn.bcebos.com/user-dqic9b
 export default function Contact() {
   usePageView();
   function copyWechat() {
-    void navigator.clipboard.writeText(WECHAT_ID);
-    toast.success('微信号已复制');
+    void copyToClipboard(WECHAT_ID, '微信号已复制');
   }
 
   function openWechat() {
