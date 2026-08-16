@@ -30,6 +30,7 @@ export default function CheckPrize() {
   const [danCount, setDanCount] = useState<number>(1);
   const [tuoCount, setTuoCount] = useState<number>(5);
   const [betCount, setBetCount] = useState<number>(1);
+  const [digitMode, setDigitMode] = useState<'直选' | '组选三' | '组选六'>('直选');
 
   const selectedGame = useMemo(
     () => games.find((g) => g.code === selectedCode) ?? null,
@@ -147,7 +148,8 @@ export default function CheckPrize() {
         setError(validationError);
         return;
       }
-      const win = checkWin(selectedGame, selectedResult, redInputs, []);
+      const playMode = (selectedGame.code === '3d' || selectedGame.code === 'pl3') ? digitMode : undefined;
+      const win = checkWin(selectedGame, selectedResult, redInputs, [], playMode);
       setResult(win);
       setBetCount(1);
       return;
@@ -305,6 +307,16 @@ export default function CheckPrize() {
                       </div>
                     )}
 
+                    {(selectedGame.code === '3d' || selectedGame.code === 'pl3') && (
+                      <Tabs value={digitMode} onValueChange={(v) => setDigitMode(v as '直选' | '组选三' | '组选六')}>
+                        <TabsList className="grid w-full grid-cols-3">
+                          <TabsTrigger value="直选">直选</TabsTrigger>
+                          <TabsTrigger value="组选三">组选三</TabsTrigger>
+                          <TabsTrigger value="组选六">组选六</TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    )}
+
                     <LotteryNumberInput
                       redCount={redInputCount}
                       blueCount={blueInputCount}
@@ -389,6 +401,11 @@ function findBestWin(
   mode: 'single' | 'complex' | 'dantuo',
   danCount: number
 ): { best: { level: number | null; name: string | null; prize: string | null }; count: number } {
+  if (game.code === 'kl8') {
+    const win = checkWin(game, result, redInputs, [], redInputs.length.toString());
+    return { best: win, count: 1 };
+  }
+
   const redCount = game.red_count ?? 0;
   const blueCount = game.blue_count ?? 0;
 

@@ -38,7 +38,7 @@ export default function History() {
     async function loadHistory() {
       setLoading(true);
       try {
-        const data = await getHistory(selectedCode, 1000);
+        const data = await getHistory(selectedCode, 100);
         if (!cancelled) {
           setHistory(data);
           setPage(1);
@@ -76,7 +76,7 @@ export default function History() {
           <Card>
             <CardHeader>
               <CardTitle>选择彩种</CardTitle>
-              <CardDescription>查看该彩种的历史开奖记录（最多近1000期）</CardDescription>
+              <CardDescription>查看该彩种的历史开奖记录（最多近100期）</CardDescription>
             </CardHeader>
             <CardContent>
               <Select value={selectedCode} onValueChange={setSelectedCode}>

@@ -23,13 +23,13 @@ import {
 import type { LotteryGame, LotteryResult } from '@/types/lottery';
 
 const PAGE_SIZE = 20;
-const CHART_COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-];
+
+function generateChartColors(count: number): string[] {
+  return Array.from({ length: count }, (_, i) => {
+    const hue = (i * 360) / Math.max(count, 1);
+    return `hsl(${hue}, 70%, 50%)`;
+  });
+}
 
 export default function GameDetail() {
   usePageView();
@@ -50,7 +50,7 @@ export default function GameDetail() {
         setLoading(true);
         const [gameData, historyData] = await Promise.all([
           getGameByCode(gameCode),
-          getHistory(gameCode, 1000),
+          getHistory(gameCode, 100),
         ]);
         if (!cancelled) {
           setGame(gameData);
@@ -82,14 +82,16 @@ export default function GameDetail() {
         name: item.issue.slice(-3),
         index: index + 1,
       };
-      item.numbers.forEach((num, i) => {
+      const allNumbers = [...item.numbers, ...item.special_numbers];
+      allNumbers.forEach((num, i) => {
         entry[`n${i + 1}`] = num;
       });
       return entry;
     });
   }, [history, trendRange]);
 
-  const lineCount = game ? Math.min(game.red_count ?? 0, 5) : 0;
+  const lineCount = game ? Math.min((game.red_count ?? 0) + (game.blue_count ?? 0), 12) : 0;
+  const chartColors = generateChartColors(Math.max(lineCount, 1));
 
   if (loading) {
     return <DetailSkeleton />;
@@ -280,8 +282,8 @@ export default function GameDetail() {
                         <defs>
                           {Array.from({ length: lineCount }).map((_, i) => (
                             <linearGradient key={i} id={`grad-${i}`} x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor={CHART_COLORS[i]} stopOpacity={0.35} />
-                              <stop offset="95%" stopColor={CHART_COLORS[i]} stopOpacity={0} />
+                              <stop offset="5%" stopColor={chartColors[i]} stopOpacity={0.35} />
+                              <stop offset="95%" stopColor={chartColors[i]} stopOpacity={0} />
                             </linearGradient>
                           ))}
                         </defs>
@@ -303,10 +305,10 @@ export default function GameDetail() {
                             type="monotone"
                             dataKey={`n${i + 1}`}
                             name={`第${i + 1}个号码`}
-                            stroke={CHART_COLORS[i]}
+                            stroke={chartColors[i]}
                             fill={`url(#grad-${i})`}
                             strokeWidth={2.5}
-                            dot={{ r: 3, fill: CHART_COLORS[i] }}
+                            dot={{ r: 3, fill: chartColors[i] }}
                             activeDot={{ r: 5 }}
                           />
                         ))}

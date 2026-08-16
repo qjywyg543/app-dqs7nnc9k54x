@@ -177,7 +177,8 @@ export function checkWin(
   game: LotteryGame,
   result: LotteryResult,
   userNumbers: number[],
-  userSpecial: number[]
+  userSpecial: number[],
+  mode?: string
 ): { level: number | null; name: string | null; prize: string | null } {
   if (game.code === 'ssq') {
     return checkSSQ(result, userNumbers, userSpecial);
@@ -186,16 +187,16 @@ export function checkWin(
     return checkDLT(result, userNumbers, userSpecial);
   }
   if (game.code === '3d' || game.code === 'pl3') {
-    return checkDigit3(result, userNumbers, game.code);
+    return checkDigit3(result, userNumbers, game.code, mode);
   }
   if (game.code === 'pl5' || game.code === 'seven' || game.code === 'qxc') {
     return checkPositionMatch(result, userNumbers, game.code);
   }
   if (game.code === 'qlc') {
-    return checkQLC(result, userNumbers);
+    return checkQLC(result, userNumbers, result.special_numbers?.[0] ?? null);
   }
   if (game.code === 'kl8') {
-    return checkKL8(result, userNumbers);
+    return checkKL8(result, userNumbers, mode);
   }
   return { level: null, name: null, prize: null };
 }
@@ -240,14 +241,44 @@ function checkDLT(
 function checkDigit3(
   result: LotteryResult,
   userNumbers: number[],
-  code: string
+  code: string,
+  mode?: string
 ): { level: number | null; name: string | null; prize: string | null } {
-  const match = result.numbers.every((n, i) => n === userNumbers[i]);
-  if (match) {
-    return code === '3d'
-      ? { level: 1, name: '直选', prize: '1040元' }
-      : { level: 1, name: '直选', prize: '1040元' };
+  const draw = result.numbers;
+  const user = userNumbers;
+  const playMode = mode || '直选';
+
+  if (playMode === '直选') {
+    if (draw.every((n, i) => n === user[i])) {
+      return { level: 1, name: '直选', prize: '1040元' };
+    }
+    return { level: null, name: null, prize: null };
   }
+
+  if (playMode === '组选三') {
+    if (draw.length === 3 && user.length === 3) {
+      const drawSorted = [...draw].sort();
+      const userSorted = [...user].sort();
+      if (drawSorted[0] === drawSorted[1] || drawSorted[1] === drawSorted[2]) {
+        if (drawSorted[0] === userSorted[0] && drawSorted[1] === userSorted[1] && drawSorted[2] === userSorted[2]) {
+          return { level: 2, name: '组选三', prize: '346元' };
+        }
+      }
+    }
+    return { level: null, name: null, prize: null };
+  }
+
+  if (playMode === '组选六') {
+    if (draw.length === 3 && user.length === 3) {
+      const drawSet = new Set(draw);
+      const userSet = new Set(user);
+      if (drawSet.size === 3 && userSet.size === 3 && drawSet.size === userSet.size && draw.every((n) => userSet.has(n))) {
+        return { level: 3, name: '组选六', prize: '173元' };
+      }
+    }
+    return { level: null, name: null, prize: null };
+  }
+
   return { level: null, name: null, prize: null };
 }
 
@@ -256,67 +287,145 @@ function checkPositionMatch(
   userNumbers: number[],
   code: string
 ): { level: number | null; name: string | null; prize: string | null } {
-  const matchCount = result.numbers.filter((n, i) => n === userNumbers[i]).length;
-
   if (code === 'pl5') {
+    const matchCount = result.numbers.filter((n, i) => n === userNumbers[i]).length;
     if (matchCount === 5) return { level: 1, name: '一等奖', prize: '100000元' };
     return { level: null, name: null, prize: null };
   }
 
   if (code === 'seven') {
-    if (matchCount === 7) return { level: 1, name: '特等奖', prize: '浮动' };
-    if (matchCount === 6) return { level: 2, name: '一等奖', prize: '浮动' };
-    if (matchCount === 5) return { level: 3, name: '二等奖', prize: '浮动' };
-    if (matchCount === 4) return { level: 4, name: '三等奖', prize: '浮动' };
-    if (matchCount === 3) return { level: 5, name: '四等奖', prize: '500元' };
-    if (matchCount === 2) return { level: 6, name: '五等奖', prize: '20元' };
-    if (matchCount === 1) return { level: 7, name: '六等奖', prize: '5元' };
+    const maxConsecutive = longestConsecutiveMatch(result.numbers, userNumbers);
+    if (maxConsecutive === 7) return { level: 1, name: '特等奖', prize: '浮动' };
+    if (maxConsecutive === 6) return { level: 2, name: '一等奖', prize: '浮动' };
+    if (maxConsecutive === 5) return { level: 3, name: '二等奖', prize: '浮动' };
+    if (maxConsecutive === 4) return { level: 4, name: '三等奖', prize: '500元' };
+    if (maxConsecutive === 3) return { level: 5, name: '四等奖', prize: '20元' };
+    if (maxConsecutive === 2) return { level: 6, name: '五等奖', prize: '5元' };
     return { level: null, name: null, prize: null };
   }
 
   if (code === 'qxc') {
-    if (matchCount === 7) return { level: 1, name: '一等奖', prize: '浮动' };
-    if (matchCount === 6) return { level: 2, name: '二等奖', prize: '浮动' };
-    if (matchCount === 5) return { level: 3, name: '三等奖', prize: '浮动' };
-    if (matchCount === 4) return { level: 4, name: '四等奖', prize: '500元' };
-    if (matchCount === 3) return { level: 5, name: '五等奖', prize: '30元' };
-
-    const hasConsecutiveTwo = result.numbers.some((n, i) => {
-      if (i >= result.numbers.length - 1) return false;
-      return n === userNumbers[i] && result.numbers[i + 1] === userNumbers[i + 1];
-    });
-    if (hasConsecutiveTwo) return { level: 6, name: '六等奖', prize: '5元' };
-
+    const maxConsecutive = longestConsecutiveMatch(result.numbers, userNumbers);
+    if (maxConsecutive === 7) return { level: 1, name: '一等奖', prize: '浮动' };
+    if (maxConsecutive === 6) return { level: 2, name: '二等奖', prize: '浮动' };
+    if (maxConsecutive === 5) return { level: 3, name: '三等奖', prize: '浮动' };
+    if (maxConsecutive === 4) return { level: 4, name: '四等奖', prize: '500元' };
+    if (maxConsecutive === 3) return { level: 5, name: '五等奖', prize: '30元' };
+    if (maxConsecutive === 2) return { level: 6, name: '六等奖', prize: '5元' };
     return { level: null, name: null, prize: null };
   }
 
   return { level: null, name: null, prize: null };
 }
 
+function longestConsecutiveMatch(draw: number[], user: number[]): number {
+  let max = 0;
+  let current = 0;
+  for (let i = 0; i < draw.length; i++) {
+    if (draw[i] === user[i]) {
+      current++;
+      max = Math.max(max, current);
+    } else {
+      current = 0;
+    }
+  }
+  return max;
+}
+
 function checkQLC(
   result: LotteryResult,
-  userNumbers: number[]
+  userNumbers: number[],
+  specialNumber: number | null
 ): { level: number | null; name: string | null; prize: string | null } {
-  const match = result.numbers.filter((n) => userNumbers.includes(n)).length;
-  if (match === 7) return { level: 1, name: '一等奖', prize: '浮动' };
-  if (match === 6) return { level: 2, name: '二等奖', prize: '浮动' };
-  if (match === 5) return { level: 3, name: '三等奖', prize: '浮动' };
-  if (match === 4) return { level: 4, name: '四等奖', prize: '200元' };
-  if (match === 3) return { level: 5, name: '五等奖', prize: '10元' };
-  if (match === 2) return { level: 6, name: '六等奖', prize: '5元' };
+  const basicMatch = result.numbers.filter((n) => userNumbers.includes(n)).length;
+  const specialMatch = specialNumber !== null && userNumbers.includes(specialNumber);
+
+  if (basicMatch === 7) return { level: 1, name: '一等奖', prize: '浮动' };
+  if (basicMatch === 6 && specialMatch) return { level: 2, name: '二等奖', prize: '浮动' };
+  if (basicMatch === 6) return { level: 3, name: '三等奖', prize: '浮动' };
+  if (basicMatch === 5 && specialMatch) return { level: 4, name: '四等奖', prize: '200元' };
+  if (basicMatch === 5) return { level: 5, name: '五等奖', prize: '50元' };
+  if (basicMatch === 4 && specialMatch) return { level: 6, name: '六等奖', prize: '10元' };
+  if (basicMatch === 4) return { level: 7, name: '七等奖', prize: '5元' };
   return { level: null, name: null, prize: null };
 }
 
 function checkKL8(
   result: LotteryResult,
-  userNumbers: number[]
+  userNumbers: number[],
+  mode?: string
 ): { level: number | null; name: string | null; prize: string | null } {
+  const pick = mode ? parseInt(mode, 10) : userNumbers.length;
+  if (pick < 1 || pick > 10) return { level: null, name: null, prize: null };
+
   const match = result.numbers.filter((n) => userNumbers.includes(n)).length;
-  if (match === 10) return { level: 1, name: '选十中十', prize: '浮动' };
-  if (match === 9) return { level: 2, name: '选十中九', prize: '8000元' };
-  if (match === 8) return { level: 3, name: '选十中八', prize: '800元' };
-  if (match === 7) return { level: 4, name: '选十中七', prize: '80元' };
-  if (match === 6) return { level: 5, name: '选十中六', prize: '5元' };
-  if (match === 5) return { level: 6, name: '选十中五', prize: '3元' };
+  const rules: Record<number, { match: number; name: string; prize: string }[]> = {
+    10: [
+      { match: 10, name: '选十中十', prize: '浮动' },
+      { match: 9, name: '选十中九', prize: '8000元' },
+      { match: 8, name: '选十中八', prize: '800元' },
+      { match: 7, name: '选十中七', prize: '80元' },
+      { match: 6, name: '选十中六', prize: '5元' },
+      { match: 5, name: '选十中五', prize: '3元' },
+    ],
+    9: [
+      { match: 9, name: '选九中九', prize: '300000元' },
+      { match: 8, name: '选九中八', prize: '2000元' },
+      { match: 7, name: '选九中七', prize: '200元' },
+      { match: 6, name: '选九中六', prize: '20元' },
+      { match: 5, name: '选九中五', prize: '5元' },
+      { match: 4, name: '选九中四', prize: '3元' },
+    ],
+    8: [
+      { match: 8, name: '选八中八', prize: '50000元' },
+      { match: 7, name: '选八中七', prize: '800元' },
+      { match: 6, name: '选八中六', prize: '100元' },
+      { match: 5, name: '选八中五', prize: '10元' },
+      { match: 4, name: '选八中四', prize: '3元' },
+    ],
+    7: [
+      { match: 7, name: '选七中七', prize: '10000元' },
+      { match: 6, name: '选七中六', prize: '200元' },
+      { match: 5, name: '选七中五', prize: '80元' },
+      { match: 4, name: '选七中四', prize: '10元' },
+      { match: 3, name: '选七中三', prize: '3元' },
+    ],
+    6: [
+      { match: 6, name: '选六中六', prize: '5000元' },
+      { match: 5, name: '选六中五', prize: '100元' },
+      { match: 4, name: '选六中四', prize: '30元' },
+      { match: 3, name: '选六中三', prize: '10元' },
+      { match: 2, name: '选六中二', prize: '3元' },
+    ],
+    5: [
+      { match: 5, name: '选五中五', prize: '1000元' },
+      { match: 4, name: '选五中四', prize: '50元' },
+      { match: 3, name: '选五中三', prize: '10元' },
+      { match: 2, name: '选五中二', prize: '3元' },
+    ],
+    4: [
+      { match: 4, name: '选四中四', prize: '100元' },
+      { match: 3, name: '选四中三', prize: '20元' },
+      { match: 2, name: '选四中二', prize: '3元' },
+    ],
+    3: [
+      { match: 3, name: '选三中三', prize: '53元' },
+      { match: 2, name: '选三中二', prize: '3元' },
+    ],
+    2: [
+      { match: 2, name: '选二中二', prize: '19元' },
+    ],
+    1: [
+      { match: 1, name: '选一中一', prize: '4.6元' },
+    ],
+  };
+
+  const levels = rules[pick] ?? [];
+  for (let i = 0; i < levels.length; i++) {
+    if (match === levels[i].match) {
+      return { level: i + 1, name: levels[i].name, prize: levels[i].prize };
+    }
+  }
+
   return { level: null, name: null, prize: null };
 }
