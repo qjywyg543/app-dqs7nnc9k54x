@@ -9,7 +9,6 @@ import Login from './pages/Login';
 import Play from './pages/Play';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
-import Download from './pages/Download';
 import type { ReactNode } from 'react';
 
 export interface RouteConfig {
@@ -85,11 +84,5 @@ export const routes: RouteConfig[] = [
     path: '/admin',
     element: withLayout(<Admin />),
     public: false,
-  },
-  {
-    name: '下载 App',
-    path: '/download',
-    element: withLayout(<Download />),
-    public: true,
   },
 ];
