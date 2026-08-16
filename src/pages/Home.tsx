@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { usePageView } from '@/hooks/usePageView';
 import { motion } from 'motion/react';
-import { ChevronRight, Gamepad2, LogIn, LogOut, User, Store, MessageCircle, MapPin, ShieldAlert, Copy, Download } from 'lucide-react';
+import { ChevronRight, Gamepad2, LogIn, LogOut, User, Store, MessageCircle, MapPin, ShieldAlert, Copy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -91,15 +91,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <Link
-                to="/download"
-                className="group flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground shadow-card transition-all hover:shadow-hover"
-              >
-                <Download className="h-3.5 w-3.5" />
-                下载 App
-              </Link>
-            </div>
+
           </div>
 
           <motion.div
